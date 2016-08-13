@@ -16,3 +16,8 @@ body {
 .page-title {
   outline: none;
 }
+
+.logo-menu {
+  height: 80%;
+  margin: 0 auto;
+}

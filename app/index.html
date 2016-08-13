@@ -72,7 +72,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <!-- Drawer Toolbar -->
         <paper-toolbar id="drawerToolbar">
-          <span class="menu-name">Menu</span>
+          <img class="logo-menu" src="images/wharf.png" alt="Wharf" title="Wharf" />
+          <!--<span class="menu-name">Menu</span>-->
         </paper-toolbar>
 
         <!-- Drawer Content -->
@@ -82,14 +83,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <span>Home</span>
           </a>
 
-          <a data-route="users" href="{{baseUrl}}users">
-            <iron-icon icon="info"></iron-icon>
-            <span>Users</span>
+          <a data-route="dockerfiles" href="{{baseUrl}}dockerfiles">
+            <iron-icon icon="description"></iron-icon>
+            <span>Dockerfiles</span>
           </a>
 
           <a data-route="contact" href="{{baseUrl}}contact">
-            <iron-icon icon="mail"></iron-icon>
-            <span>Contact</span>
+            <iron-icon icon="line-style"></iron-icon>
+            <span>Images</span>
+          </a>
+
+          <a data-route="contact" href="{{baseUrl}}contact">
+            <iron-icon icon="dashboard"></iron-icon>
+            <span>Compositions</span>
           </a>
         </paper-menu>
       </paper-scroll-header-panel>
@@ -97,7 +103,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <!-- Main Area -->
       <paper-scroll-header-panel main id="headerPanelMain" condenses keep-condensed-header>
         <!-- Main Toolbar -->
-        <paper-toolbar id="mainToolbar" class="tall">
+        <paper-toolbar id="mainToolbar">
           <paper-icon-button id="paperToggle" icon="menu" paper-drawer-toggle></paper-icon-button>
 
           <span class="space"></span>
@@ -108,13 +114,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           <!-- Application name -->
           <div class="middle middle-container">
-            <div class="app-name">Polymer Starter Kit</div>
+            <div class="app-name">Docker management made simple</div>
           </div>
 
           <!-- Application sub title -->
-          <div class="bottom bottom-container">
-            <div class="bottom-title">The future of the web today</div>
-          </div>
+          <!--<div class="bottom bottom-container">-->
+          <!--  <div class="bottom-title">The future of the web today</div>-->
+          <!--</div>-->
         </paper-toolbar>
 
         <!-- Main Content -->
@@ -154,14 +160,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </paper-material>
             </section>
 
-            <section data-route="users" tabindex="-1">
+            <section data-route="dockerfiles" tabindex="-1">
               <paper-material elevation="1">
-                <h1 class="page-title" tabindex="-1">Users</h1>
-                <p>This is the users section</p>
-                <a href$="{{baseUrl}}users/Addy">Addy</a><br>
-                <a href$="{{baseUrl}}users/Rob">Rob</a><br>
-                <a href$="{{baseUrl}}users/Chuck">Chuck</a><br>
-                <a href$="{{baseUrl}}users/Sam">Sam</a>
+                <h1 class="page-title" tabindex="-1">Dockerfiles</h1>
+                <p>This is the dockerfiles section</p>
+                <dockerfiles-view></dockerfiles-view>
               </paper-material>
             </section>
 

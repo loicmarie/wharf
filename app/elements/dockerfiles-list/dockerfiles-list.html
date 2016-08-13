@@ -11,7 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-styles/typography.html">
 
-<dom-module id="my-list">
+<dom-module id="dockerfiles-list">
   <template>
     <style>
       :host {
@@ -21,13 +21,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       span {
         @apply(--paper-font-body1);
       }
+      paper-fab.blue {
+        display: inline-block;
+        margin: 10px;
+        --paper-fab-background: var(--paper-light-blue-500);
+        --paper-fab-keyboard-focus-background: var(--paper-light-blue-900);
+      }
     </style>
 
     <ul>
-      <template is="dom-repeat" items="{{items}}">
-        <li><span>{{item}}</span></li>
-      </template>
+      <!--<template is="dom-repeat" items="{{items}}">-->
+      <!--  <li><span>{{item}}</span></li>-->
+      <!--</template>-->
     </ul>
+    
   </template>
 
   <script>
@@ -35,7 +42,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       'use strict';
 
       Polymer({
-        is: 'my-list',
+        is: 'dockerfiles-list',
 
         properties: {
           items: {
