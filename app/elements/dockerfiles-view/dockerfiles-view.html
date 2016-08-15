@@ -27,37 +27,94 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --paper-fab-background: var(--paper-light-blue-500);
         --paper-fab-keyboard-focus-background: var(--paper-light-blue-900);
       }
-      .col-2 {
-          display: inline-block;
-          width: 49%;
+      paper-button.blue {
+        display: inline-block;
+        margin: 20px 0;
+        background: var(--paper-light-blue-500);
+        color: white;
+        width: 100%;
+        text-align: center;
+      }
+      paper-button.blue::focus {
+        background: var(--paper-light-blue-900);
+      }
+      paper-icon-button {
+          height: 60px;
+      }
+      paper-textarea {
+          line-height: 0.7;
       }
     </style>
     
+    <iron-ajax
+        auto
+        url="http://www.google.com/"
+        method="GET"
+        on-response="handleResponse"
+        debounce-duration="300">
+    </iron-ajax>
+    
     <ul>
       <dockerfiles-list></dockerfiles-list>
-      <!--<template is="dom-repeat" items="{{items}}">-->
-      <!--  <li><span>{{item}}</span></li>-->
-      <!--</template>-->
     </ul>
     <div hidden={{hideEditZone}}>
-        <div class="col-2">
-            <paper-input list="countries" label="Image" value="{{text::input}}"></paper-input>
-            <datalist id="countries">
-            	<option value="India">India</option>
-            	<option value="United States">United States</option>
-            	<option value="United Kingdom">United Kingdom</option>
-            	<option value="Germany">Germany</option>
-            	<option value="France">France</option>
-            </datalist>
-        </div>
-        <div class="col-2">
-            {{text}}
+        <div class="row">
+            <div class="col-md-6">
+                <div hidden$={{!hideNewLayer}}>
+                    <template is="dom-repeat" items="{{dockerfile}}">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <paper-dropdown-menu label="{{item.instrKey}}">
+                                  <paper-listbox class="dropdown-content" attr-for-selected="value" selected="{{item.instrKey}}">
+                                      <template is="dom-repeat" items="{{format}}" as="subitem">
+                                            <template is="dom-if" if="{{subitem.multi}}">
+                                                <paper-item value="{{subitem.id}}">{{subitem.id}}</paper-item>
+                                            </template>
+                                      </template>
+                                  </paper-listbox>
+                                </paper-dropdown-menu>
+                            </div>
+                            <div class="col-md-8">
+                                <paper-textarea label="command" value="{{item.instrContent::input}}"></paper-textarea>
+                            </div>
+                            <div class="col-md-1" style="padding:0px">
+                                <paper-icon-button on-tap="deleteLayer" data-args$="{{item.instrKey}}" icon="delete"></paper-icon-button>
+                            </div>
+                        </div>
+                    </template>
+                    <!--<paper-textarea label="{{item.id}}" value="{{item.value::input}}"></paper-textarea>-->
+                    <!--<paper-button on-click="toggleNewLayer" class="blue">-->
+                    <!--    <iron-icon icon="arrow-back"></iron-icon>-->
+                    <!--    Cancel-->
+                    <!--</paper-button>-->
+                </div>
+                <!--<div hidden$={{!hideNewLayer}}>-->
+                <paper-button on-click="toggleNewLayer" class="blue">
+                    <iron-icon icon="add-circle"></iron-icon>
+                    New Layer
+                </paper-button>
+                <!--</div>-->
+                <!--<datalist id="countries">-->
+                <!--	<option value="India">India</option>-->
+                <!--</datalist>-->
+            </div>
+            <div class="col-md-6">
+                <!--<paper-material elevation="1">-->
+                    <!--filter="{{isLayerSet(dockerfile)}}observe="value"" -->
+             
+                <!--</paper-material>-->
+                <code-mirror mode="docker" class="code-mirror" theme="eclipse" readOnly>
+                </code-mirror>
+            </div>
         </div>
     </div>
-
-    <paper-fab icon="create" title="heart" class="blue" on-click="setEditMode"></paper-fab>
-    <paper-fab icon="file-upload" title="heart" class="blue"></paper-fab>
-    
+    <div hidden$={{!hideEditZone}}>
+        <paper-fab icon="create" title="heart" class="blue" on-click="setEditMode"></paper-fab>
+        <paper-fab icon="file-upload" title="heart" class="blue"></paper-fab>
+    </div>
+    <!--<div hidden$={{hideEditZone}}>-->
+        <!--<paper-fab icon="add" title="heart" class="blue" on-click="setEditMode"></paper-fab>-->
+    <!--</div>-->
   </template>
 
   <script>
@@ -76,6 +133,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 type: String,
                 notify: true
             },
+            format: {
+                type: Array,
+                value: function() {
+                    return [
+                        { id: "FROM", value: "", multi: false },
+                        { id: "MAINTAINER", value: "", multi: false },
+                        { id: "RUN", value: "", multi: true },
+                        { id: "CMD", value: "", multi: false },
+                        { id: "LABEL", value: "", multi: false },
+                        { id: "WORKDIR", value: "", multi: false },
+                        { id: "VOLUME", value: "", multi: true },
+                        { id: "ONBUILD", value: "", multi: true },
+                        { id: "EXPOSE", value: "", multi: true },
+                        { id: "ENV", value: "", multi: true },
+                        { id: "ADD", value: "", multi: true },
+                        { id: "ENTRYPOINT", value: "", multi: false }
+                    ]
+                },
+                notify: true
+            },
+            dockerfile: {
+                type: Array,
+                value: function() {
+                    return []
+                },
+                notify: true
+            },
             text: {
                 type: String,
                 notify: true
@@ -83,33 +167,154 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             hideEditZone: {
                 type: Boolean,
                 value: true
+            },
+            hideNewLayer: {
+                type: Boolean,
+                value: true
+            },
+            newLayerIndex: {
+                type: Number,
+                notify: true,
+                value: 0
+            },
+            newLayerSelectedItem: {
+                type: Object,
+                notify: true
+            },
+            newLayerSelectedInstrKey: {
+                type: String,
+                // value: "",
+                notify: true
+            },
+            newLayerSelectedInstrContent: {
+                type: String,
+                // value: "",
+                notify: true
             }
         },
+        observers: [
+            'dockerfileInstrContentChanged(dockerfile.*.instrContent)'
+        ],
         listeners: {
-            'mode-changed': 'handleModeChanged'
+            'mode-changed': 'handleModeChanged',
+            'dockerfile-changed': 'handleDockerfileChanged'
+            // 'new-layer-selected-instr-key-changed': 'handleNewLayerSelectedInstrKeyChanged',
+            // 'new-layer-selected-instr-content-changed': 'handleNewLayerSelectedInstrContentChanged',
+            // 'new-layer-selected-item-changed': 'handleNewLayerSelectedItemChanged'
+        },
+        deleteLayer: function(e) {
+            console.log(e.model.item);
+            // console.log(e.target.getAttribute('data-args'));
+            // var args = e.target.getAttribute('data-args').split(',');
+            // console.log(args);
+            for (var i=0; i<this.dockerfile.length; i++) {
+                if (this.dockerfile[i].instrContent == e.model.item.instrContent
+                    && this.dockerfile[i].instrKey == e.model.item.instrKey) {
+                    this.splice('dockerfile', i, 1);
+                }
+            }
+        },
+        dockerfileInstrContentChanged: function() {
+            console.log(this.dockerfile);  
+        },
+        handleResponse: function(res) {
+            console.log(res);    
         },
         
         setEditMode: function() {
             this.mode = 'edit';
         },
         
+        isEditMode: function() {
+            return this.mode == 'edit';
+        },
+        
+        isLayerSet: function(item) {
+            return item.value != '';
+        },
+        
+        toggleNewLayer: function() {
+            if (this.hideNewLayer) {
+                this.push('dockerfile', {
+                    instrKey: 'RUN',
+                    instrContent: ''
+                });
+                // console.log(this.dockerfile);
+            } else {
+                delete this.dockerfile[this.newLayerIndex];
+            }
+            this.newLayerIndex = this.dockerfile.length-1;
+            this.newLayerSelectedInstrContent = '';
+            this.newLayerSelectedInstrKey = '';
+            // this.$.test.render();
+        },
+        
+        formatText: function() {
+            var str = '';
+            for (var i in this.dockerfile) {
+                if ('' != this.dockerfile[i].instrContent) {
+                    str += this.dockerfile[i].instrKey + ' ' + this.dockerfile[i].instrContent.replace(new RegExp('\n', 'g'), '\n\t') + '\n\n';
+                }
+            }
+            this.text = str;
+        },
+        
         handleModeChanged: function() {
             switch(this.mode) {
                 case 'edit':
                     this.hideEditZone = !this.hideEditZone;
+                    this.refreshCodeMirror();
                     break;
+            }
+        },
+        
+        handleDockerfileChanged: function() {
+        //     this.newLayerSelectedInstrContent = this.dockerfile[this.newLayerIndex].instrContent;
+        //     this.newLayerSelectedInstrKey = this.dockerfile[this.newLayerIndex].instrKey;
+            this.refreshCodeMirror();
+        },
+        
+        // handleNewLayerSelectedInstrContentChanged: function() {
+        //     this.dockerfile[this.newLayerIndex].instrContent = this.newLayerSelectedInstrContent;
+        //     this.refreshCodeMirror();
+        // },
+        
+        // handleNewLayerSelectedInstrKeyChanged: function () {
+        //     this.dockerfile[this.newLayerIndex].instrKey = this.newLayerSelectedInstrKey;
+        //     this.refreshCodeMirror();
+        // },
+        
+        // handleNewLayerSelectedItemChanged: function() {
+        //     if (this.newLayerSelectedItem && this.newLayerSelectedItem.hasOwnProperty('value'))
+        //         this.newLayerSelectedInstrKey = this.newLayerSelectedItem.value;
+            //     if (this.newLayerIndex) {
+            //         if (this.newLayerIndex == )
+            //         del this.dockerfile[this.newLayerIndex]
+            //     } else {
+            //         this.dockerfile.push({
+            //             instrKey: this.newLayerSelectedItem.value,
+            //             intrContent: this.newLayerInstrContent
+            //         });
+            //     }
+            // }
+        // },
+        
+        refreshCodeMirror: function() {
+            var els = document.getElementsByClassName('CodeMirror');
+            for(var el in els){
+                el = parseInt(el, 10);
+                if(!isNaN(el)) {
+                    // console.log(els[el])
+                    this.formatText();
+                    els[el].CodeMirror.readOnly = true;
+                    els[el].CodeMirror.setValue(this.text);
+                    els[el].CodeMirror.refresh();
+                }
             }
         },
 
         ready: function() {
-          this.items = [
-            'Responsive Web App boilerplate',
-            'Iron Elements and Paper Elements',
-            'End-to-end Build Tooling (including Vulcanize)',
-            'Unit testing with Web Component Tester',
-            'Routing with Page.js',
-            'Offline support with the Platinum Service Worker Elements'
-          ];
+          this.refreshCodeMirror();
         }
       });
     })();

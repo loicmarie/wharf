@@ -30,9 +30,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
 
     <ul>
-      <!--<template is="dom-repeat" items="{{items}}">-->
-      <!--  <li><span>{{item}}</span></li>-->
-      <!--</template>-->
+      <template is="dom-repeat" items="{{yolo}}">
+        <li><span>{{item}}</span></li>
+      </template>
+      <paper-button on-click="addYolo">Add !</paper-button>
     </ul>
     
   </template>
@@ -45,14 +46,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         is: 'dockerfiles-list',
 
         properties: {
-          items: {
+          yolo: {
             type: Array,
             notify: true
           }
         },
+        
+        addYolo: function() {
+          this.push('yolo', 'ok!');
+        },
 
         ready: function() {
-          this.items = [
+          this.yolo = [
             'Responsive Web App boilerplate',
             'Iron Elements and Paper Elements',
             'End-to-end Build Tooling (including Vulcanize)',
