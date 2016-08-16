@@ -21,3 +21,11 @@ body {
   height: 80%;
   margin: 0 auto;
 }
+
+iron-pages {
+  padding: 0px!important;
+}
+
+.wrapper {
+  padding: 42px;
+}

@@ -27,16 +27,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --paper-fab-background: var(--paper-light-blue-500);
         --paper-fab-keyboard-focus-background: var(--paper-light-blue-900);
       }
-      paper-button.blue {
+      paper-button.blue, paper-button.green {
         display: inline-block;
-        margin: 20px 0;
-        background: var(--paper-light-blue-500);
+        margin: 20px 0 0 0;
         color: white;
         width: 100%;
         text-align: center;
       }
+      paper-button.blue {
+        background: var(--paper-light-blue-500);
+      }
       paper-button.blue::focus {
         background: var(--paper-light-blue-900);
+      }
+      paper-button.green {
+        background: var(--paper-light-green-900);
+      }
+      paper-button.green::focus {
+        background: var(--paper-light-green-900);
       }
       paper-icon-button {
           height: 60px;
@@ -45,18 +53,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           line-height: 0.7;
       }
     </style>
-    
-    <iron-ajax
+
+    <!-- <byutv-jsonp
         auto
-        url="http://www.google.com/"
+        url="http://localhost:5000/dockerfiles"
         method="GET"
-        on-response="handleResponse"
+        last-response="{{ajaxResponse}}"
         debounce-duration="300">
-    </iron-ajax>
-    
-    <ul>
+    </byutv-jsonp> -->
+    <iron-ajax id="getDockerfiles" auto url="http://localhost:5000/dockerfiles" handle-as="json" last-response="{{ajaxResponse}}"></iron-ajax>
+    <!-- <ul> -->
+        <!-- <template is="dom-repeat" items="{{ajaxResponse}}">
+            <li>{{item.name}} ======> {{item.content}}</li>
+        </template> -->
+    <!-- </ul> -->
+    <!-- <ul>
       <dockerfiles-list></dockerfiles-list>
-    </ul>
+    </ul> -->
     <div hidden={{hideEditZone}}>
         <div class="row">
             <div class="col-md-6">
@@ -93,6 +106,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <iron-icon icon="add-circle"></iron-icon>
                     New Layer
                 </paper-button>
+                <paper-button on-click="saveNewLayer" class="green">
+                    <iron-icon icon="save"></iron-icon>
+                    Save
+                </paper-button>
                 <!--</div>-->
                 <!--<datalist id="countries">-->
                 <!--	<option value="India">India</option>-->
@@ -101,7 +118,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div class="col-md-6">
                 <!--<paper-material elevation="1">-->
                     <!--filter="{{isLayerSet(dockerfile)}}observe="value"" -->
-             
+
                 <!--</paper-material>-->
                 <code-mirror mode="docker" class="code-mirror" theme="eclipse" readOnly>
                 </code-mirror>
@@ -123,7 +140,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       Polymer({
         is: 'dockerfiles-view',
-        
+
         properties: {
             items: {
                 type: Array,
@@ -190,6 +207,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 type: String,
                 // value: "",
                 notify: true
+            },
+            ajaxResponse: {
+                type: Array,
+                notify: true
             }
         },
         observers: [
@@ -197,11 +218,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ],
         listeners: {
             'mode-changed': 'handleModeChanged',
-            'dockerfile-changed': 'handleDockerfileChanged'
+            'dockerfile-changed': 'handleDockerfileChanged',
+            'ajax-response-changed': 'handleAjaxResponseChanged'
             // 'new-layer-selected-instr-key-changed': 'handleNewLayerSelectedInstrKeyChanged',
             // 'new-layer-selected-instr-content-changed': 'handleNewLayerSelectedInstrContentChanged',
             // 'new-layer-selected-item-changed': 'handleNewLayerSelectedItemChanged'
         },
+        handleAjaxResponseChanged: function() {
+          console.log(this.ajaxResponse);
+        },
+        saveNewLayer: function() {
+          $.ajax({
+              url: "http://localhost:5000/dockerfiles",
+              method: "POST",
+              data: {
+                name: "yeahtest",
+                content: this.text
+              },
+              // dataType: "jsonp",
+              // Work with the response
+              success: response => {
+                console.log('yessss'); // server response
+                console.log(response); // server response
+                this.$.getDockerfiles.generateRequest();
+              },
+              error: function(xhr, status, error) {
+                // var err = JSON.parse(xhr.responseText);
+                alert(JSON.stringify(xhr));
+                alert(status);
+                alert(error);
+              }
+
+          });
+        },
+
         deleteLayer: function(e) {
             console.log(e.model.item);
             // console.log(e.target.getAttribute('data-args'));
@@ -215,24 +265,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
         },
         dockerfileInstrContentChanged: function() {
-            console.log(this.dockerfile);  
+            // console.log(this.dockerfile);
         },
         handleResponse: function(res) {
-            console.log(res);    
+            console.log('ok !');
+            console.log(res);
         },
-        
+
         setEditMode: function() {
             this.mode = 'edit';
         },
-        
+
         isEditMode: function() {
             return this.mode == 'edit';
         },
-        
+
         isLayerSet: function(item) {
             return item.value != '';
         },
-        
+
         toggleNewLayer: function() {
             if (this.hideNewLayer) {
                 this.push('dockerfile', {
@@ -248,7 +299,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.newLayerSelectedInstrKey = '';
             // this.$.test.render();
         },
-        
+
         formatText: function() {
             var str = '';
             for (var i in this.dockerfile) {
@@ -258,7 +309,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
             this.text = str;
         },
-        
+
         handleModeChanged: function() {
             switch(this.mode) {
                 case 'edit':
@@ -267,23 +318,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     break;
             }
         },
-        
+
         handleDockerfileChanged: function() {
         //     this.newLayerSelectedInstrContent = this.dockerfile[this.newLayerIndex].instrContent;
         //     this.newLayerSelectedInstrKey = this.dockerfile[this.newLayerIndex].instrKey;
             this.refreshCodeMirror();
         },
-        
+
         // handleNewLayerSelectedInstrContentChanged: function() {
         //     this.dockerfile[this.newLayerIndex].instrContent = this.newLayerSelectedInstrContent;
         //     this.refreshCodeMirror();
         // },
-        
+
         // handleNewLayerSelectedInstrKeyChanged: function () {
         //     this.dockerfile[this.newLayerIndex].instrKey = this.newLayerSelectedInstrKey;
         //     this.refreshCodeMirror();
         // },
-        
+
         // handleNewLayerSelectedItemChanged: function() {
         //     if (this.newLayerSelectedItem && this.newLayerSelectedItem.hasOwnProperty('value'))
         //         this.newLayerSelectedInstrKey = this.newLayerSelectedItem.value;
@@ -298,7 +349,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             //     }
             // }
         // },
-        
+
         refreshCodeMirror: function() {
             var els = document.getElementsByClassName('CodeMirror');
             for(var el in els){
